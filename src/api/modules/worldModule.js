@@ -1,7 +1,9 @@
 export function getWorldId(instance) {
-    return () => instance.get("/getWorldId")
+    return () => instance.get("/semen")
 }
 
-export function newYear(instance) {
-    return (id) => instance.get("/")
+export function getWorld(instance, id) {
+    return () => instance.get(`/world/${id}`)
 }
+
+
