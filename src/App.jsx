@@ -2,36 +2,42 @@ import React, {useLayoutEffect, useState} from 'react';
 import classes from './App.module.css'
 import {request} from "./api/request";
 import CustomHeader from "./components/CustomHeader/CustomHeader";
+import WorldInfo from "./components/WorldInfo/WorldInfo";
+import {Context} from "./context/context";
+import DistributionLayer from "./components/DistributionLayer/DistributionLayer";
 
 function App() {
-    const [worldId, setWorldId] = useState(0)
+    const [worldId] = useState(1)
     const [world, setWorld] = useState({})
 
+    const getWorld = async (id) => {
+        await request.getWorld(id).then(r => setWorld(r.data))
+    }
+
     useLayoutEffect(() => {
-        const getWorldId = async () => {
-            console.log('A')
-
-            if (window.localStorage.getItem('worldId') == null) {
-                const id = await request.getWorldId().then(r => r.data)
-                console.log(id);
-                window.localStorage.setItem('worldId', id)
-                return id
-            }
-
-            return window.localStorage.getItem('worldId')
-        }
-
-        const getWorld = async (id) => {
-            setWorld(request.)
-        }
-
-        getWorldId().then(r => setWorldId(r)).catch(e => console.log(e))
+        getWorld(worldId).catch(e => console.log(e))
     }, [])
 
+
     return (
-        <div className={classes.App}>
-            <CustomHeader positive={positive} negative={negative}/>
-        </div>
+        <Context.Provider value={
+            {
+                getCurrentWorld: () => getWorld(worldId),
+                worldId
+            }
+        }>
+            <div className={classes.App}>
+                <CustomHeader worldName={world.name} negative={world?.distributionLayer?.screamsCount}
+                              positive={world?.hell?.producedScreams}
+                              requestFunction={async () => {
+                                  await request.nextYear(worldId).then(() => getWorld(worldId))
+                                  console.log("Next Year")
+                                  console.log(world)
+                              }}/>
+                <DistributionLayer committees={world?.distributionLayer?.distributionCommittees} humansAmount={world?.distributionLayer?.humans?.length}/>
+                <WorldInfo hell={world.hell || {}} real={world.realWorld || {}}/>
+            </div>
+        </Context.Provider>
     );
 }
 
